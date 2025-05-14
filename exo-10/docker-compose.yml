@@ -1,0 +1,53 @@
+services:
+  flask:
+    image: projet-deploiement_flask:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    secrets:
+      - secret_key
+    volumes:
+      - data-volume:/home/flaskuser/data
+    networks:
+      - webnet
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  nginx:
+    image: nginx:stable-alpine
+    configs:
+      - source: nginx_conf
+        target: /etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    networks:
+      - webnet
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: rollback
+
+volumes:
+  data-volume:
+
+secrets:
+  secret_key:
+    external: true
+
+configs:
+  nginx_conf:
+    file: ./nginx.conf
+
+networks:
+  webnet:
+    driver: overlay

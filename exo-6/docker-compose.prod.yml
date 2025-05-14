@@ -1,0 +1,16 @@
+services:
+  flask-backend:
+    env_file:
+      - .env.prod
+    environment:
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_PORT=${FLASK_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+
+  nginx:
+    env_file:
+      - .env.prod
+    ports:
+      - "${NGINX_PORT}:80"

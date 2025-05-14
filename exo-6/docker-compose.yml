@@ -1,0 +1,38 @@
+services:
+  flask-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask-backend
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_PORT=${FLASK_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+    expose:
+      - "${FLASK_PORT}"
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    env_file:
+      - .env
+    environment:
+      - NGINX_PORT=${NGINX_PORT}
+    ports:
+      - "${NGINX_PORT}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flask-backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

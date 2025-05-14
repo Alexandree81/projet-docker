@@ -1,0 +1,49 @@
+services:
+  flask-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask-backend
+    user: "flaskuser"
+    expose:
+      - "5000"
+    networks:
+      - internal-net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    user: "nginx"
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flask-backend
+    networks:
+      - internal-net
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+
+networks:
+  internal-net:
+    driver: bridge
+    internal: true
